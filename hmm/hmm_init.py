@@ -24,7 +24,7 @@ def count_character():
         for line in tweets:
             line = convert(line)
             for character in line:
-                character=character.lower()
+                character=character
                 if character != '\n':
                     if character in number_of_characters.keys():
                         number_of_characters[character]+=1
@@ -55,10 +55,9 @@ def states():
     #print list_of_states
     return list_of_states
 
-def calc_probabilities(row):
+def calc_probabilities_transictions(row):
     sum = np.sum(row)
     return row / sum
-
 
 def transition_model():
     numb_of_char , total= count_character()
@@ -67,12 +66,21 @@ def transition_model():
     transitions = np.asmatrix(np.full((n_states, n_states), 1.0/sys.maxint))
     with codecs.open('training/Pontifex_text.txt', 'r', 'latin') as tweets:
         for line in tweets:
-            line = convert(line).lower()
+            line = convert(line)
             for i in range(0, len(line)-1):
                 if line[i]!='\n' and line[i+1]!='\n':
                     row_index = list_of_states.index(line[i])
                     col_index = list_of_states.index(line[i+1])
                     transitions[row_index,col_index]+=1
-    transitions = np.apply_along_axis( calc_probabilities, axis=1, arr=transitions )
+    transitions = np.apply_along_axis( calc_probabilities_transictions, axis=1, arr=transitions )
     print transitions
     # return transitions
+
+def observation():
+    observations = states()
+    return observations
+
+def emission_probability():
+    obs = observation()
+    n_obs = len(obs)
+    transitions = np.asmatrix(np.full((n_obs, n_obs), 0.0))
