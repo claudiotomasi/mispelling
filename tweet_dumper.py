@@ -12,7 +12,11 @@ access_secret = "lH1YZ9VjghCOeCFrS8S4A8oF6Rg9P8pgPrzSG6ipQRjqg"
 
 
 def strip_links(text):
-    char_regex = re.compile('[^a-zA-Z\. ]')
+    link_regex    = re.compile('((https?):((//)|(\\\\))+([\w\d:#@%/;$()~_?\+-=\\&](#!)?)*)', re.DOTALL)
+    links         = re.findall(link_regex, text)
+    for link in links:
+        text = text.replace(link[0], '')
+    char_regex = re.compile('[^a-zA-Z\.\ ]')
     legals  = re.findall(char_regex, text)
     for l in legals:
         text= text.replace(l[0], '')

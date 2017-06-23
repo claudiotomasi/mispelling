@@ -9,12 +9,13 @@ states=hmm_init.states()
 possible_obs = hmm_init.observation()
 emissions = hmm_init.emission_probability(utility.adjacents())
 
+print len(states),len(emissions)
 
 model = hmlib.hmm(states, possible_obs, prior, transitions, emissions)
 string_tweets = ""
-with codecs.open("training/Pontifex_testing.txt" , "r", 'utf-8-sig') as f:
+with codecs.open("training/test.txt" , "r", 'utf-8-sig') as f:
     for tweet in f:
         tweet = hmm_init.convert(tweet)
         string_tweets+=tweet
-obs = string_tweets.split()
-print model.viterbi(obs)
+obs = list(string_tweets)
+print ''.join(model.viterbi(obs[:len(obs)-1]))

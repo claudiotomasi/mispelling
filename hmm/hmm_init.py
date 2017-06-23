@@ -87,8 +87,8 @@ def emission_probability(adj_list):
     n_obs = len(obs)
     print obs
     epsilon = 1.0/1000
-    emissions = np.asmatrix(np.full((n_obs, n_obs), 1.0/1000))
-    likelihood = 0.6-epsilon
+    emissions = np.asmatrix(np.full((n_obs, n_obs), 0.0))
+    likelihood = 0.6
     for k,v in adj_list.iteritems():
         state = obs.index(k)
         emissions[state, state] += likelihood
@@ -121,4 +121,5 @@ def emission_probability(adj_list):
             for el in elements:
                 obs_index = obs.index(el)
                 emissions[state, obs_index] += prob
-    print np.sum(emissions, axis=1)
+    #print np.sum(emissions, axis=1)
+    return emissions
