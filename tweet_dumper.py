@@ -3,7 +3,7 @@
 
 import tweepy #https://github.com/tweepy/tweepy
 import csv, string, random, numpy, codecs, sys
-
+import re,string
 #Twitter API credentials
 consumer_key = "yrvZ7JAMm8jJ8dsYewLsf7OrA"
 consumer_secret = "Xb1Fd6dVykFGScinOfyqiyQKYtBR19ASLSTEaf0Y58vExaaeAC"
@@ -11,9 +11,61 @@ access_key = "135605919-s4heOuOWQIszNOIeFdBgh1kESfqlB7Jl471kwqcB"
 access_secret = "lH1YZ9VjghCOeCFrS8S4A8oF6Rg9P8pgPrzSG6ipQRjqg"
 
 
+def strip_links(text):
+    char_regex = re.compile('[^a-zA-Z\. ]')
+    legals  = re.findall(char_regex, text)
+    for l in legals:
+        text= text.replace(l[0], '')
+    return text
+
+def strip_all_entities(text):
+    entity_prefixes = ['@','#']
+    for separator in  string.punctuation:
+        if separator not in entity_prefixes :
+            text = text.replace(separator,'.')
+    words = []
+    for word in text.split():
+        word = word.strip()
+        if word:
+            if word[0] not in entity_prefixes:
+                words.append(word)
+    return ' '.join(words)
+
+def remove_hashtags_links(tweet):
+	return strip_all_entities(strip_links(tweet))
+
+def total_perturbation(string_tweets, pert):
+    length = len(string_tweets)
+    sizePerturbation = numpy.uint8(length * 10/ 100)
+    lista = list(string_tweets)
+    for j in range(1, sizePerturbation):
+        newChar = random.choice(string.letters[:26])
+        what = random.randint(1, length-1)
+        #while line[what] == ' ' or line[what] == "\'":
+        	#what = random.randint(0, length-1)
+        lista[what] = newChar
+        string_tweets = ''.join(lista)
+    pert.write(unicode(string_tweets))
+
+
+def single_perturbation(f, outtweets):
+	for i in outtweets:
+		line = i[2].decode('utf-8')
+		length = len(line)
+		sizePerturbation = numpy.uint8(length * 5/ 100)
+		for j in range(1, sizePerturbation):
+			lista = list(line)
+			newChar = random.choice(string.letters[:26])
+			what = random.randint(1, length-1)
+			#while line[what] == ' ' or line[what] == "\'":
+				#what = random.randint(0, length-1)
+			lista[what] = newChar
+			line = ''.join(lista)
+		f.write(unicode(line)+" ")
+
+
 def get_all_tweets(screen_name):
 	#Twitter only allows access to a users most recent 3240 tweets with this method
-
 	#authorize twitter, initialize tweepy
 	auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 	auth.set_access_token(access_key, access_secret)
@@ -54,26 +106,24 @@ def get_all_tweets(screen_name):
 		writer = csv.writer(f)
 		writer.writerow(["id","created_at","text"])
 		writer.writerows(outtweets)
-	pass
+
+	string_tweets = ""
+	with codecs.open("training/%s_original.txt" % screen_name, "w", 'utf-8-sig') as f:
+		for tweet in outtweets:
+			line = tweet[2].decode('utf-8')
+			line = remove_hashtags_links(line)
+			string_tweets += line+" "
+		f.write(unicode(string_tweets)) #aggiugnere \n ?
 
 	nTweets = len(outtweets)
-	#print nTweets
-	#Testo con perturbazione
-	with codecs.open("training/%s_text.txt" % screen_name, "w", 'utf-8-sig') as f:
-		for i in outtweets:
-			line = i[2].decode('utf-8')
-			length = len(line)
-			sizePerturbation = numpy.uint8(length * 5/ 100)
-			for j in range(1, sizePerturbation):
-				lista = list(line)
-				newChar = random.choice(string.letters[:26])
-				what = random.randint(1, length-1)
-				#while line[what] == ' ' or line[what] == "\'":
-					#what = random.randint(0, length-1)
-				lista[what] = newChar
-				line = ''.join(lista)
-			f.write(unicode(line)+" ")
-    	pass
+
+	with codecs.open("training/%s_testing.txt" % screen_name, "w", 'utf-8-sig') as perturbation:
+            total_perturbation(string_tweets, perturbation)
+
+
+	#with codecs.open("training/%s_singlePert.txt" % screen_name, "w", 'utf-8-sig') as f:
+		#single_perturbation(f, outtweets)
+
 
 
 if __name__ == '__main__':
