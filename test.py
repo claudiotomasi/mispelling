@@ -1,21 +1,45 @@
 from hmm import hmm_init
 from utility import utility
 import hidden_markov as hmlib
-import codecs
+import codecs, pickle
 
-prior = hmm_init.prior_probability()
-transitions = hmm_init.transition_model()
-states=hmm_init.states()
-possible_obs = hmm_init.observation()
-emissions = hmm_init.emission_probability(utility.adjacents())
+#prior = hmm_init.prior_probability()
+#transitions = hmm_init.transition_model()
+#states=hmm_init.states()
+#possible_obs = hmm_init.observation()
+#emissions = hmm_init.emission_probability(utility.adjacents())
 
-print len(states),len(emissions)
+#print len(states),len(emissions)
 
-model = hmlib.hmm(states, possible_obs, prior, transitions, emissions)
-string_tweets = ""
-with codecs.open("training/test.txt" , "r", 'utf-8-sig') as f:
-    for tweet in f:
-        tweet = hmm_init.convert(tweet)
-        string_tweets+=tweet
-obs = list(string_tweets)
-print ''.join(model.viterbi(obs[:len(obs)-1]))
+#model = hmlib.hmm(states, possible_obs, prior, transitions, emissions)
+#afile = open('training/model', 'wb')
+#pickle.dump(model, afile)
+#afile.close()
+afile = open('training/model', 'rb')
+model = pickle.load(afile)
+afile.close()
+
+tweet = ""
+with codecs.open("test/acaso.txt" , "r", 'utf-8-sig') as f:
+    for tweets in f:
+        tweet += hmm_init.convert(tweets)
+#elimino newline
+tweet = tweet.replace('\n','')
+list_of_words = tweet.split('.')
+correct = ""
+for word in list_of_words:
+    #se frase non vuota aggiungo un punto alla fine
+    if word!= '':
+        word+='. '
+    obs = list(word)
+    #print obs
+    if obs!=[]:
+        if obs[0]==' ':
+            obs = obs[1:]
+        if obs[0]!='\n':
+            correct += ''.join(model.viterbi(obs))
+
+with codecs.open('test/correct.txt', 'w', 'utf-8-sig') as f:
+    correct = unicode(correct)
+    f.write(correct)
+#Si potrebbe calcolare viterbi sulle parole e non sulle frasi

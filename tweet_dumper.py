@@ -3,7 +3,8 @@
 
 import tweepy #https://github.com/tweepy/tweepy
 import csv, string, random, numpy, codecs, sys
-import re,string
+import re,string, random
+from utility import utility
 #Twitter API credentials
 consumer_key = "yrvZ7JAMm8jJ8dsYewLsf7OrA"
 consumer_secret = "Xb1Fd6dVykFGScinOfyqiyQKYtBR19ASLSTEaf0Y58vExaaeAC"
@@ -39,15 +40,18 @@ def remove_hashtags_links(tweet):
 	return strip_all_entities(strip_links(tweet))
 
 def total_perturbation(string_tweets, pert):
+    adjacents_list = utility.adjacents()
     length = len(string_tweets)
     sizePerturbation = numpy.uint8(length * 10/ 100)
     lista = list(string_tweets)
     for j in range(1, sizePerturbation):
-        newChar = random.choice(string.letters[:26])
-        what = random.randint(1, length-1)
+        position = random.randint(1, length-1)
         #while line[what] == ' ' or line[what] == "\'":
         	#what = random.randint(0, length-1)
-        lista[what] = newChar
+        key = lista[position]
+        set_of_adjacents = adjacents_list[key]
+        error = random.choice(set_of_adjacents[1:])
+        lista[position] = error
         string_tweets = ''.join(lista)
     pert.write(unicode(string_tweets))
 
@@ -90,7 +94,6 @@ def get_all_tweets(screen_name):
 	#keep grabbing tweets until there are no tweets left to grab
 	while len(new_tweets) > 0:
 		print "getting tweets before %s" % (oldest)
-
 		#all subsiquent requests use the max_id param to prevent duplicates
 		new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
 
@@ -104,13 +107,15 @@ def get_all_tweets(screen_name):
 
 	#transform the tweepy tweets into a 2D array that will populate the csv
 	outtweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
-
 	#write the csv
-	with open('training/%s_tweets.csv' % screen_name, 'wb') as f:
+	with open('csv/%s_tweets.csv' % screen_name, 'wb') as f:
 		writer = csv.writer(f)
 		writer.writerow(["id","created_at","text"])
 		writer.writerows(outtweets)
 
+    #divido file per frase splittando per punto
+    #ad ogni frase aggiungo punto e spazio
+    #creo la lista della frase, controllo che non sia vuota, elimino eventuali spazi all'inizio
 	string_tweets = ""
 	with codecs.open("training/%s_original.txt" % screen_name, "w", 'utf-8-sig') as f:
 		for tweet in outtweets:
@@ -121,7 +126,7 @@ def get_all_tweets(screen_name):
 
 	nTweets = len(outtweets)
 
-	with codecs.open("training/%s_testing.txt" % screen_name, "w", 'utf-8-sig') as perturbation:
+	with codecs.open("test/%s_testing.txt" % screen_name, "w", 'utf-8-sig') as perturbation:
             total_perturbation(string_tweets, perturbation)
 
 

@@ -1,5 +1,6 @@
 import codecs, collections, sys
 import numpy as np
+import glob
 
 
 def convert_keys_to_string(dictionary):
@@ -21,16 +22,17 @@ def convert(data):
 def count_character():
     number_of_characters = {}
     total_characters = 0.0
-    with codecs.open('training/Pontifex_testing.txt', 'r', 'utf-8-sig') as tweets:
-        for line in tweets:
-            line = convert(line)
-            for character in line:
-                if character != '\n':
-                    if character in number_of_characters.keys():
-                        number_of_characters[character]+=1
-                    else:
-                        number_of_characters[character]=1
-                    total_characters +=1;
+    for filename in glob.glob('training/*.txt'):
+        with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
+            for line in tweets:
+                line = convert(line)
+                for character in line:
+                    if character != '\n':
+                        if character in number_of_characters.keys():
+                            number_of_characters[character]+=1
+                        else:
+                            number_of_characters[character]=1
+                        total_characters +=1;
     #for k in number_of_characters:
     #    print repr(k), number_of_characters[k]
     #print total_characters, number_of_characters
@@ -66,14 +68,16 @@ def transition_model():
     list_of_states = states()
     n_states = len(list_of_states)
     transitions = np.asmatrix(np.full((n_states, n_states), 1.0/sys.maxint))
-    with codecs.open('training/Pontifex_testing.txt', 'r', 'utf-8-sig') as tweets:
-        for line in tweets:
-            line = convert(line)
-            for i in range(0, len(line)-1):
-                if line[i]!='\n' and line[i+1]!='\n':
-                    row_index = list_of_states.index(line[i])
-                    col_index = list_of_states.index(line[i+1])
-                    transitions[row_index,col_index]+=1
+
+    for filename in glob.glob('training/*.txt'):
+        with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
+            for line in tweets:
+                line = convert(line)
+                for i in range(0, len(line)-1):
+                    if line[i]!='\n' and line[i+1]!='\n':
+                        row_index = list_of_states.index(line[i])
+                        col_index = list_of_states.index(line[i+1])
+                        transitions[row_index,col_index]+=1
     transitions = np.apply_along_axis( calc_probabilities_transictions, axis=1, arr=transitions )
     #'print' transitions
     return transitions
@@ -88,7 +92,7 @@ def emission_probability(adj_list):
     print obs
     epsilon = 1.0/1000
     emissions = np.asmatrix(np.full((n_obs, n_obs), 0.0))
-    likelihood = 0.6
+    likelihood = 0.8
     for k,v in adj_list.iteritems():
         state = obs.index(k)
         emissions[state, state] += likelihood
@@ -97,15 +101,15 @@ def emission_probability(adj_list):
             if k.islower():
                 low = v[1 : indexCapital]
                 up = v[indexCapital :]
-                weightLow = 0.3
-                weightUp = 0.1
+                weightLow = 0.15
+                weightUp = 0.03
                 probLow = weightLow/len(low)
                 probUp= weightUp/len(up)
             else:
                 low = v[: indexCapital]
                 up = v[indexCapital+1 :]
-                weightLow = 0.1
-                weightUp = 0.3
+                weightLow = 0.03
+                weightUp = 0.15
                 probLow = weightLow/len(low)
                 probUp= weightUp/len(up)
             for el in low:
@@ -115,11 +119,21 @@ def emission_probability(adj_list):
                 obs_index = obs.index(el)
                 emissions[state, obs_index] += probUp
         else:
+            if k == ' ':
+                emissions[state, state]  = 0.9
+                weight= 0.08
+            else:
+                weight= 0.18
             elements= v[1 : ]
-            weight= 0.4
             prob = weight/len(elements)
             for el in elements:
                 obs_index = obs.index(el)
                 emissions[state, obs_index] += prob
+
+        epsilon=0.02/(len(obs)-len(v))
+        for j in range(0,len(obs)):
+            if emissions[state,j]==0:
+                    emissions[state,j] = epsilon
+                
     #print np.sum(emissions, axis=1)
     return emissions
