@@ -134,6 +134,6 @@ def emission_probability(adj_list):
         for j in range(0,len(obs)):
             if emissions[state,j]==0:
                     emissions[state,j] = epsilon
-                
+
     #print np.sum(emissions, axis=1)
     return emissions
