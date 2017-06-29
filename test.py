@@ -1,7 +1,7 @@
 from hmm import hmm_init
 from utility import utility
 import hidden_markov as hmlib
-import codecs, pickle, argparse
+import codecs, pickle, argparse, glob
 from sklearn import metrics
 
 parser = argparse.ArgumentParser()
@@ -18,9 +18,10 @@ if args.train:
     afile = open('training/model', 'wb')
     pickle.dump(model, afile)
     afile.close()
+    print "End of training\n"
 
 else:
-    print "Without Training"
+    print "Without Training\n"
     afile = open('training/model', 'rb')
     model = pickle.load(afile)
     afile.close()
@@ -28,35 +29,38 @@ else:
 
 
 states = model.states
-tweet = ""
-with codecs.open("test/Pontifex_test_of_remains.txt" , "r", 'utf-8-sig') as f:
-    for tweets in f:
-        tweet += hmm_init.convert(tweets)
-#elimino newline
-tweet = tweet.replace('\n','')
-#separo per frasi
-list_of_words = tweet.split('.')
-correct = ""
-pred = []
-for word in list_of_words:
-    #se frase non vuota aggiungo un punto alla fine
-    if word!= '':
-        word+='. '
-    obs = list(word)
-    #print obs
-    if obs!=[]:
-        # Rimuovo spazi all'inizio
-        if obs[0]==' ':
-            obs = obs[1:]
-        if obs[0]!='\n':
-            pred += model.viterbi(obs)
-#trasformo lista predizioni in stringa
-correct += ''.join(pred)
 
-with codecs.open('test/correct.txt', 'w', 'utf-8-sig') as f:
-    correct = unicode(correct)
-    f.write(correct)
+for filename in glob.glob('test/*.txt'):
+    tweet = ""
+    with codecs.open(filename , "r", 'utf-8-sig') as f:
+        print "Start prediction of "+filename+"..."
+        for tweets in f:
+            tweet += hmm_init.convert(tweets)
+    #elimino newline
+    tweet = tweet.replace('\n','')
+    #separo per frasi
+    list_of_words = tweet.split('.')
+    correct = ""
+    pred = []
+    for word in list_of_words:
+        #se frase non vuota aggiungo un punto alla fine
+        if word!= '':
+            word+='. '
+        obs = list(word)
+        #print obs
+        if obs!=[]:
+            # Rimuovo spazi all'inizio
+            if obs[0]==' ':
+                obs = obs[1:]
+            if obs[0]!='\n':
+                pred += model.viterbi(obs)
+    #trasformo lista predizioni in stringa
+    correct += ''.join(pred)
 
+    with codecs.open(filename+'_correct', 'w', 'utf-8-sig') as f:
+        correct = unicode(correct)
+        f.write(correct)
+    print "End prediction of "+filename+"\n"
 
 
 

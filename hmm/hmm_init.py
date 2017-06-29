@@ -105,7 +105,7 @@ def observation():
 def emission_probability(adj_list):
     obs = observation()
     n_obs = len(obs)
-    print obs
+    #print obs
     epsilon = 1.0/1000
     emissions = np.asmatrix(np.full((n_obs, n_obs), 0.0))
     likelihood = 0.8
