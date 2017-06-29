@@ -108,7 +108,7 @@ def emission_probability(adj_list):
     #print obs
     epsilon = 1.0/1000
     emissions = np.asmatrix(np.full((n_obs, n_obs), 0.0))
-    likelihood = 0.7
+    likelihood = 0.8
     for k,v in adj_list.iteritems():
         state = obs.index(k)
         emissions[state, state] += likelihood
@@ -117,15 +117,15 @@ def emission_probability(adj_list):
             if k.islower():
                 low = v[1 : indexCapital]
                 up = v[indexCapital :]
-                weightLow = 0.18
-                weightUp = 0.10
+                weightLow = 0.15
+                weightUp = 0.03
                 probLow = weightLow/len(low)
                 probUp= weightUp/len(up)
             else:
                 low = v[: indexCapital]
                 up = v[indexCapital+1 :]
-                weightLow = 0.10
-                weightUp = 0.18
+                weightLow = 0.03
+                weightUp = 0.15
                 probLow = weightLow/len(low)
                 probUp= weightUp/len(up)
             for el in low:
@@ -139,7 +139,7 @@ def emission_probability(adj_list):
                 emissions[state, state]  = 0.9
                 weight= 0.08
             else:
-                weight= 0.28
+                weight= 0.18
             elements= v[1 : ]
             prob = weight/len(elements)
             for el in elements:
