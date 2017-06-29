@@ -18,7 +18,6 @@ import glob, os
 #                                 test.write(unicode(character))
 
 
-
 def convert_keys_to_string(dictionary):
     """Recursively converts dictionary keys to strings."""
     if not isinstance(dictionary, dict):
@@ -86,6 +85,7 @@ def transition_model():
     transitions = np.asmatrix(np.full((n_states, n_states), 1.0/sys.maxint))
 
     for filename in glob.glob('training/*.txt'):
+        print "Training of "+filename+"..."
         with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
             for line in tweets:
                 line = convert(line)
