@@ -43,17 +43,13 @@ for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
     #separo per frasi
 
 
-    # list_of_words = tweet.split('.')
-    list_of_words = tweet.split()
-
+    list_of_words = tweet.split('.')
     correct = ""
     pred = []
     for word in list_of_words:
         #se frase non vuota aggiungo un punto alla fine
-
-        # if word!= '':
-        #     word+='. '
-        #print word
+        if word!= '':
+            word+='. '
         obs = list(word)
         #print obs
         if obs!=[]:
