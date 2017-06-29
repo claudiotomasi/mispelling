@@ -1,6 +1,22 @@
 import codecs, collections, sys
 import numpy as np
-import glob
+import glob, os
+
+# def extract_test_training():
+#     total_characters=0
+#     for filename in glob.glob('originals/*.txt'):
+#         with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
+#             with codecs.open('training/knowledge_base.txt', 'w', 'utf-8-sig') as know:
+#                 with codecs.open('test/test_of_remains.txt', 'w', 'utf-8-sig') as test:
+#                     size = (os.stat(filename).st_size/100.0)*80
+#                     for line in tweets:
+#                         for character in line:
+#                             if total_characters<size:
+#                                 total_characters +=len(character)
+#                                 know.write(unicode(character))
+#                             else:
+#                                 test.write(unicode(character))
+
 
 
 def convert_keys_to_string(dictionary):

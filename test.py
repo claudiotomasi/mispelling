@@ -29,16 +29,15 @@ else:
 
 states = model.states
 tweet = ""
-with codecs.open("test/Pontifex_testing.txt" , "r", 'utf-8-sig') as f:
+with codecs.open("test/Pontifex_test_of_remains.txt" , "r", 'utf-8-sig') as f:
     for tweets in f:
         tweet += hmm_init.convert(tweets)
 #elimino newline
 tweet = tweet.replace('\n','')
+#separo per frasi
 list_of_words = tweet.split('.')
 correct = ""
 pred = []
-real = []
-pert = []
 for word in list_of_words:
     #se frase non vuota aggiungo un punto alla fine
     if word!= '':
@@ -46,11 +45,12 @@ for word in list_of_words:
     obs = list(word)
     #print obs
     if obs!=[]:
+        # Rimuovo spazi all'inizio
         if obs[0]==' ':
             obs = obs[1:]
         if obs[0]!='\n':
             pred += model.viterbi(obs)
-            pert += obs
+#trasformo lista predizioni in stringa
 correct += ''.join(pred)
 
 with codecs.open('test/correct.txt', 'w', 'utf-8-sig') as f:
@@ -58,41 +58,7 @@ with codecs.open('test/correct.txt', 'w', 'utf-8-sig') as f:
     f.write(correct)
 
 
-#####BOH
-#calcolo liste testo .testo perturbato
-tweet = ""
-with codecs.open("training/Pontifex_original.txt" , "r", 'utf-8-sig') as f:
-    for tweets in f:
-        tweet += hmm_init.convert(tweets)
-#elimino newline
-tweet = tweet.replace('\n','')
-list_of_words = tweet.split('.')
 
-for word in list_of_words:
-    #se frase non vuota aggiungo un punto alla fine
-    if word!= '':
-        word+='. '
-    obs = list(word)
-    #print obs
-    if obs!=[]:
-        if obs[0]==' ':
-            obs = obs[1:]
-        if obs[0]!='\n':
-            real+= obs
-# Funzione duplicata sopare mettere in una funzione
-diff_orig_pred = 0
-diff_orig_pert = 0
-diff_pred_pert = 0
-for i in range(0 , len(pred)):
-    if real[i] != pred[i]:
-        diff_orig_pred+=1
-    if pert[i] != real[i]:
-        diff_orig_pert+=1
-    if pert[i] != pred[i]:
-        diff_pred_pert+=1
-print "Difference original-predetto: " + str(diff_orig_pred), len(real), len(pred)
-print "Difference original-perturbato: " + str(diff_orig_pert)
-print "Difference predetto-perturbato: " + str(diff_pred_pert)
 
 #confusion_matrix(real, pred, states, sample_weight=None)
 #Si potrebbe calcolare viterbi sulle parole e non sulle frasi
