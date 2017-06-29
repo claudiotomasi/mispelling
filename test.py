@@ -32,7 +32,7 @@ else:
 states = model.states
 ####
 
-for filename in glob.glob('test/jk_rowling_test_of_remains.txt'):
+for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
     tweet = ""
     with codecs.open(filename , "r", 'utf-8-sig') as f:
         print "Start prediction of "+filename+"..."
