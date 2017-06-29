@@ -3,6 +3,7 @@ from utility import utility
 import hidden_markov as hmlib
 import codecs, pickle, argparse, glob
 from sklearn import metrics
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--train', help='Training or not', action='store_true')
@@ -29,6 +30,7 @@ else:
 
 
 states = model.states
+####
 
 for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
     tweet = ""
@@ -39,13 +41,19 @@ for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
     #elimino newline
     tweet = tweet.replace('\n','')
     #separo per frasi
-    list_of_words = tweet.split('.')
+
+
+    # list_of_words = tweet.split('.')
+    list_of_words = tweet.split()
+
     correct = ""
     pred = []
     for word in list_of_words:
         #se frase non vuota aggiungo un punto alla fine
-        if word!= '':
-            word+='. '
+
+        # if word!= '':
+        #     word+='. '
+        #print word
         obs = list(word)
         #print obs
         if obs!=[]:
@@ -55,13 +63,13 @@ for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
             if obs[0]!='\n':
                 pred += model.viterbi(obs)
     #trasformo lista predizioni in stringa
+
     correct += ''.join(pred)
 
     with codecs.open(filename+'_correct', 'w', 'utf-8-sig') as f:
         correct = unicode(correct)
         f.write(correct)
     print "End prediction of "+filename+"\n"
-
 
 
 #confusion_matrix(real, pred, states, sample_weight=None)
