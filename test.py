@@ -1,11 +1,31 @@
 from hmm import hmm_init
 from utility import utility
 import hidden_markov as hmlib
-import codecs, pickle, argparse, glob
+import codecs, pickle, argparse, glob, csv
 from sklearn import metrics
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 
+def confusion(states):
+    real = ""
+    with codecs.open('remain/Pontifex_test_of_remains.txt' , "r", 'utf-8-sig') as f:
+        for s in f:
+            real+=s
+    real = list(real)
+    pred = ""
+    with codecs.open('test/Pontifex_test_of_remains.txt_correct' , "r", 'utf-8-sig') as f:
+        for s in f:
+            #print s
+            pred+=s
+    pred = list(real)
+
+    matrix = metrics.confusion_matrix(real,pred,states)
+    with open('csv/confusion.csv', 'wb') as f:
+        writer = csv.writer(f)
+
+        writer.writerow(states)
+        for i in range(0, matrix.shape[0]):
+            writer.writerows(matrix[i:])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -39,7 +59,7 @@ if __name__ == '__main__':
         tweet = tweet.replace('\n','')
         #separo per frasi
 
-
+    states = model.states
         # list_of_words = tweet.split('.')
     list_of_words = tweet.split()
 
@@ -65,3 +85,5 @@ if __name__ == '__main__':
         correct = unicode(correct)
         f.write(correct)
     print "End prediction of "+filename+"\n"
+
+    #eeconfusion(states)
