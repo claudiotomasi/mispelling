@@ -129,7 +129,7 @@ def get_all_tweets(screen_name):
     size = (os.stat("originals/%s_original.txt" % screen_name).st_size/100.0)*80
     with codecs.open("originals/%s_original.txt" % screen_name, 'r', 'utf-8-sig') as tweets:
         with codecs.open('training/%s_knowledge_base.txt' % screen_name, 'w', 'utf-8-sig') as know:
-            with codecs.open('test/%s_test_of_remains.txt' % screen_name, 'w', 'utf-8-sig') as test:
+            with codecs.open('remain/%s_test_of_remains.txt' % screen_name, 'w', 'utf-8-sig') as test:
                 for line in tweets:
                     for character in line:
                         if total_characters<size:
@@ -139,7 +139,7 @@ def get_all_tweets(screen_name):
                             test.write(unicode(character))
 
     string_tweets = ""
-    with codecs.open("test/%s_test_of_remains.txt" % screen_name, "r", 'utf-8-sig') as f:
+    with codecs.open("remain/%s_test_of_remains.txt" % screen_name, "r", 'utf-8-sig') as f:
     	for tweet in f:
     		string_tweets += tweet
 

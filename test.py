@@ -32,7 +32,7 @@ else:
 states = model.states
 ####
 
-for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
+for filename in glob.glob('remain/Pontifex_test_of_remains.txt'):
     tweet = ""
     with codecs.open(filename , "r", 'utf-8-sig') as f:
         print "Start prediction of "+filename+"..."
@@ -47,8 +47,9 @@ for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
     list_of_words = tweet.split()
 
     correct = ""
-    pred = []
+
     for word in list_of_words:
+        pred = []
         #se frase non vuota aggiungo un punto alla fine
         if word!= '':
             word+=' '
@@ -62,13 +63,28 @@ for filename in glob.glob('test/Pontifex_test_of_remains.txt'):
                 pred += model.viterbi(obs)
     #trasformo lista predizioni in stringa
 
-    correct += ''.join(pred)
+        correct += ''.join(pred)
 
     with codecs.open(filename+'_correct', 'w', 'utf-8-sig') as f:
         correct = unicode(correct)
         f.write(correct)
     print "End prediction of "+filename+"\n"
 
-
-#confusion_matrix(real, pred, states, sample_weight=None)
+# real=[]
+# tweet=''
+# with codecs.open('remain/Pontifex_test_of_remains.txt', 'r', 'utf-8-sig') as f:
+#     for tweets in f:
+#         tweet += hmm_init.convert(tweets)
+#     tweet = tweet.replace('\n','')
+# real = list(tweet)
+#
+#
+# tweet=''
+# pred = []
+# with codecs.open('test/Pontifex_test_of_remains.txt_correct', 'r', 'utf-8-sig') as f:
+#     for tweets in f:
+#         tweet += hmm_init.convert(tweets)
+#
+# pred = list(tweet)
+# print metrics.confusion_matrix(real, pred, states, sample_weight=None)
 #Si potrebbe calcolare viterbi sulle parole e non sulle frasi
