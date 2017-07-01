@@ -1,7 +1,7 @@
 import codecs, collections, sys
 import numpy as np
 import glob, os
-
+from utility import utility
 # def extract_test_training():
 #     total_characters=0
 #     for filename in glob.glob('originals/*.txt'):
@@ -17,31 +17,14 @@ import glob, os
 #                             else:
 #                                 test.write(unicode(character))
 
-#TO DO mergeduplicated code
-def convert_keys_to_string(dictionary):
-    """Recursively converts dictionary keys to strings."""
-    if not isinstance(dictionary, dict):
-        return dictionary
-    return dict((str(k), convert_keys_to_string(v))
-        for k, v in dictionary.items())
 
-def convert(data):
-    if isinstance(data, basestring):
-        return data.encode('utf-8')
-    elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
-    elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
-    else:
-        return data
-#TO DO END
-def count_character():
+def count_character(language):
     number_of_characters = {}
     total_characters = 0.0
-    for filename in glob.glob('training/*.txt'):
+    for filename in glob.glob('training/'+language+'/*.txt'):
         with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
             for line in tweets:
-                line = convert(line)
+                line = utility.convert(line)
                 for character in line:
                     total_characters = count_character_helper(character, number_of_characters, total_characters)
     #for k in number_of_characters:
@@ -60,11 +43,11 @@ def count_character_helper(character, number_of_characters, total_characters):
     return total_characters
 
 
-def prior_probability():
-    state_list = states()
+def prior_probability(language):
+    state_list = states(language)
     length_state = len(state_list)
     prior_prob= np.full(length_state, 0.0)
-    numb_of_char, total = count_character()
+    numb_of_char, total = count_character(language)
     s = 0.0
 
     #Transform in frequences numb_of_char
@@ -75,8 +58,8 @@ def prior_probability():
         #s+=prior_probability[i]
     #print s
     return np.matrix(prior_prob)
-def states():
-    numb_of_char, total = count_character()
+def states(language):
+    numb_of_char, total = count_character(language)
     list_of_states = numb_of_char.keys()
     #print list_of_states
     return list_of_states
@@ -85,17 +68,17 @@ def calc_probabilities_transictions(row):
     sum = np.sum(row)
     return row / sum
 
-def transition_model():
-    numb_of_char , total= count_character()
-    list_of_states = states()
+def transition_model(language):
+    numb_of_char , total= count_character(language)
+    list_of_states = states(language)
     n_states = len(list_of_states)
     transitions = np.asmatrix(np.full((n_states, n_states), 1.0/sys.maxint))
 
-    for filename in glob.glob('training/*.txt'):
+    for filename in glob.glob('training/'+language+'/*.txt'):
         print ("Training of "+filename+"...")
         with codecs.open(filename, 'r', 'utf-8-sig') as tweets:
             for line in tweets:
-                line = convert(line)
+                line = utility.convert(line)
                 for i in range(0, len(line)-1):
                     filename_helper(i, line, list_of_states, transitions)
     transitions = np.apply_along_axis( calc_probabilities_transictions, axis=1, arr=transitions )
@@ -110,12 +93,12 @@ def filename_helper(i, line, list_of_states, transitions):
         transitions[row_index, col_index] += 1
 
 
-def observation():
-    observations = states()
+def observation(language):
+    observations = states(language)
     return observations
 
-def emission_probability(adj_list):
-    obs = observation()
+def emission_probability(adj_list, language):
+    obs = observation(language)
     n_obs = len(obs)
     #print obs
     epsilon = 1.0/1000

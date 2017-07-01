@@ -3,7 +3,7 @@
 
 import tweepy #https://github.com/tweepy/tweepy
 import csv, string, random, numpy, codecs, sys
-import re,string, random, os
+import re,string, random, os, argparse
 from utility import utility
 #Twitter API credentials
 consumer_key = "yrvZ7JAMm8jJ8dsYewLsf7OrA"
@@ -73,7 +73,7 @@ def single_perturbation(f, outtweets):
 		f.write(unicode(line)+" ")
 
 
-def get_all_tweets(screen_name):
+def get_all_tweets(screen_name, language):
     #Twitter only allows access to a users most recent 3240 tweets with this method
     #authorize twitter, initialize tweepy
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -109,7 +109,7 @@ def get_all_tweets(screen_name):
     #transform the tweepy tweets into a 2D array that will populate the csv
     outtweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
     #write the csv
-    with open('csv/%s_tweets.csv' % screen_name, 'wb') as f:
+    with open('csv/'+language+'/%s_tweets.csv' % screen_name, 'wb') as f:
         writer = csv.writer(f)
         writer.writerow(["id","created_at","text"])
         writer.writerows(outtweets)
@@ -118,7 +118,7 @@ def get_all_tweets(screen_name):
     #ad ogni frase aggiungo punto e spazio
     #creo la lista della frase, controllo che non sia vuota, elimino eventuali spazi all'inizio
     string_tweets = ""
-    with codecs.open("originals/%s_original.txt" % screen_name, "w", 'utf-8-sig') as f:
+    with codecs.open('originals/'+language+'/%s_original.txt' % screen_name, "w", 'utf-8-sig') as f:
         for tweet in outtweets:
         	line = tweet[2].decode('utf-8')
         	line = remove_hashtags_links(line)
@@ -127,20 +127,20 @@ def get_all_tweets(screen_name):
 
     n_tweets = len(outtweets)
     total_characters = 0
-    size = (os.stat("originals/%s_original.txt" % screen_name).st_size/100.0)*80
-    with codecs.open("originals/%s_original.txt" % screen_name, 'r', 'utf-8-sig') as tweets:
-        with codecs.open('training/%s_knowledge_base.txt' % screen_name, 'w', 'utf-8-sig') as know:
-            with codecs.open('remain/%s_test_of_remains.txt' % screen_name, 'w', 'utf-8-sig') as test:
+    size = (os.stat('originals/'+language+'/%s_original.txt' % screen_name).st_size/100.0)*80
+    with codecs.open('originals/'+language+'/%s_original.txt' % screen_name, 'r', 'utf-8-sig') as tweets:
+        with codecs.open('training/'+language+'/%s_knowledge_base.txt' % screen_name, 'w', 'utf-8-sig') as know:
+            with codecs.open('remain/'+language+'/%s_test_of_remains.txt' % screen_name, 'w', 'utf-8-sig') as test:
                 for line in tweets:
                     divisioner_helper(know, line, size, test, total_characters)
 
     string_tweets = ""
-    with codecs.open("remain/%s_test_of_remains.txt" % screen_name, "r", 'utf-8-sig') as f:
+    with codecs.open('remain/'+language+'/%s_test_of_remains.txt' % screen_name, "r", 'utf-8-sig') as f:
     	for tweet in f:
     		string_tweets += tweet
 
 
-    with codecs.open("test/%s_test_of_remains.txt" % screen_name, "w", 'utf-8-sig') as perturbation:
+    with codecs.open('test/'+language+'/%s_test_of_remains.txt' % screen_name, "w", 'utf-8-sig') as perturbation:
             total_perturbation(string_tweets, perturbation)
 
     #with codecs.open("training/%s_singlePert.txt" % screen_name, "w", 'utf-8-sig') as f:
@@ -157,5 +157,12 @@ def divisioner_helper(know, line, size, test, total_characters):
 
 
 if __name__ == '__main__':
-	#pass in the username of the account you want to download
-	get_all_tweets(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--language', help='Select language', choices = ['en', 'it'], default = 'en')
+    parser.add_argument('-a', '--account', help='Select language')
+    args = parser.parse_args()
+
+    language = args.language
+    account = args.account
+    #pass in the username of the account you want to download
+    get_all_tweets(account, language)
